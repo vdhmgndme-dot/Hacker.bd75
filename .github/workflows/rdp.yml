@@ -16,29 +16,14 @@ jobs:
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 0
         net user runneradmin Admin@123
 
-    - name: Start Pinggy TCP Tunnel and Show URL
+    - name: Start Pinggy TCP Tunnel
       run: |
-        # Run SSH tunnel in background and capture output to a log file
-        Start-Process -FilePath "ssh.exe" -ArgumentList "-p 443 -R0:localhost:3389 a.pinggy.io" -RedirectStandardOutput "pinggy.log" -RedirectStandardError "pinggy_err.log" -PassThru
-        Start-Sleep -Seconds 7
-        
-        # Read the log to find the Pinggy TCP address
-        $logContent = Get-Content "pinggy.log" -ErrorAction SilentlyContinue
-        $errContent = Get-Content "pinggy_err.log" -ErrorAction SilentlyContinue
-        
         Write-Host "========================================"
-        Write-Host "Windows 11 RDP via Pinggy is Ready!"
-        Write-Host "URL Output:"
-        Write-Host $logContent
-        Write-Host $errContent
+        Write-Host "Windows 11 RDP via Pinggy is Starting..."
         Write-Host "Username: runneradmin"
         Write-Host "Password: Admin@123"
         Write-Host "========================================"
-
-    - name: Keep Alive Loop
-      run: |
-        while ($true) {
-            Write-Host "Windows 11 RDP is running... Keeping session alive."
-            Start-Sleep -Seconds 60
-        }
+        
+        # Run SSH and stream output directly to console
+        ssh -o StrictHostKeyChecking=no -p 443 -R0:localhost:3389 a.pinggy.io
         
