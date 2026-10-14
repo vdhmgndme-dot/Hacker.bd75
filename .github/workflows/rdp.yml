@@ -11,6 +11,11 @@ jobs:
     steps:
     - name: Create Custom User & Enable RDP
       run: |
+        # Disable password complexity requirement to allow simple passwords
+        secedit /export /cfg C:\config.inf
+        ((Get-Content C:\config.inf) -replace 'PasswordComplexity = 1', 'PasswordComplexity = 0') | Set-Content C:\config.inf
+        secedit /configure /db C:\windows\security\database\secedit.sdb /cfg C:\config.inf /areas SECURITYPOLICY
+        
         # Create user 'admin' with password 'admin'
         net user admin admin /add
         net localgroup administrators admin /add
