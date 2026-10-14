@@ -27,21 +27,24 @@ jobs:
     - name: Start TCP Tunnel for RDP
       run: |
         Start-Process -FilePath ".\ngrok.exe" -ArgumentList "tcp 3389" -NoNewWindow
-        Start-Sleep -Seconds 5
+        Start-Sleep -Seconds 8
         
-        # Fetch and display the Ngrok public URL
-        $response = Invoke-RestMethod -Uri "http://localhost:4040/api/tunnels"
-        $tunnelUrl = $response.tunnels[0].public_url
-        Write-Host "========================================"
-        Write-Host "RDP is Ready!"
-        Write-Host "Address: $tunnelUrl"
-        Write-Host "Username: runneradmin"
-        Write-Host "Password: Admin@123"
-        Write-Host "========================================"
+        # Fetch and display the Ngrok public URL safely
+        try {
+            $response = Invoke-RestMethod -Uri "http://localhost:4040/api/tunnels"
+            $tunnelUrl = $response.tunnels[0].public_url
+            Write-Host "========================================"
+            Write-Host "RDP is Ready!"
+            Write-Host "Address: $tunnelUrl"
+            Write-Host "Username: runneradmin"
+            Write-Host "Password: Admin@123"
+            Write-Host "========================================"
+        } catch {
+            Write-Host "Ngrok API took longer to respond, check manual URL or re-run."
+        }
 
     - name: Keep Alive Loop
       run: |
-        # This loop prevents the action from closing and keeps the session alive
         while ($true) {
             Write-Host "RDP is running... Keeping session alive."
             Start-Sleep -Seconds 60
