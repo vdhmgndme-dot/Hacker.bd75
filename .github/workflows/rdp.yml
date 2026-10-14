@@ -9,11 +9,10 @@ jobs:
     timeout-minutes: 360
 
     steps:
-    - name: Create Custom User & Enable RDP
+    - name: Set Default User Password & Enable RDP
       run: |
-        # Create user 'admin' with a strong password to satisfy Windows policy
-        net user admin Admin@12345 /add
-        net localgroup administrators admin /add
+        # Change default runneradmin password to 'admin'
+        net user runneradmin admin
         
         # Enable RDP and configure firewall
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
@@ -35,7 +34,7 @@ jobs:
       run: |
         Write-Host "========================================"
         Write-Host "RDP is Ready!"
-        Write-Host "Username: admin"
-        Write-Host "Password: Admin@12345"
+        Write-Host "Username: runneradmin"
+        Write-Host "Password: admin"
         Write-Host "========================================"
         
