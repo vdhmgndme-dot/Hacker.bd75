@@ -11,8 +11,12 @@ jobs:
     steps:
     - name: Set Default User Password & Enable RDP
       run: |
-        # Change default runneradmin password to 'admin'
-        net user runneradmin admin
+        # Use PowerShell to safely change the runneradmin password to meet Windows policy
+        $Computer = [ADSI]"WinNT://$env:COMPUTERNAME"
+        $User = $Computer.Create("User", "runneradmin")
+        # Alternatively, change password using .NET to bypass policy limits
+        $userObj = [adsis("WinNT://$env:COMPUTERNAME/runneradmin,user")]
+        $userObj.SetPassword("Admin@12345")
         
         # Enable RDP and configure firewall
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
@@ -35,6 +39,6 @@ jobs:
         Write-Host "========================================"
         Write-Host "RDP is Ready!"
         Write-Host "Username: runneradmin"
-        Write-Host "Password: admin"
+        Write-Host "Password: Admin@12345"
         Write-Host "========================================"
         
