@@ -20,13 +20,17 @@ jobs:
       run: |
         Invoke-WebRequest https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe -OutFile cloudflared.exe
 
-    - name: Start Cloudflare TCP Tunnel
+    - name: Start Cloudflare TCP Tunnel and Show URL
       run: |
-        Start-Process PowerShell -ArgumentList "-NoExit", "-Command", ".\cloudflared.exe tunnel --url rdp://localhost:3389"
+        # Run cloudflared and output to a log file to capture the URL
+        Start-Process -FilePath ".\cloudflared.exe" -ArgumentList "tunnel --url rdp://localhost:3389" -RedirectStandardError "cloudflare.log" -PassThru
+        Start-Sleep -Seconds 7
         
+        # Read the log to find the trycloudflare URL
+        $logContent = Get-Content "cloudflare.log" -Raw
         Write-Host "========================================"
         Write-Host "Windows 11 RDP via Cloudflare is Ready!"
-        Write-Host "Check the opened PowerShell window for the Cloudflare trycloudflare.com URL"
+        Write-Host $logContent
         Write-Host "Username: runneradmin"
         Write-Host "Password: Admin@123"
         Write-Host "========================================"
