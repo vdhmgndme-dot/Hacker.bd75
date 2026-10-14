@@ -1,4 +1,4 @@
-name: Windows 11 RDP Cloudflare
+name: Windows 11 RDP Pinggy
 
 on:
   workflow_dispatch:
@@ -16,21 +16,13 @@ jobs:
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 0
         net user runneradmin Admin@123
 
-    - name: Download Cloudflare Tunnel (Cloudflared)
+    - name: Start Pinggy TCP Tunnel
       run: |
-        Invoke-WebRequest https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe -OutFile cloudflared.exe
-
-    - name: Start Cloudflare TCP Tunnel and Show URL
-      run: |
-        # Run cloudflared and output to a log file to capture the URL
-        Start-Process -FilePath ".\cloudflared.exe" -ArgumentList "tunnel --url rdp://localhost:3389" -RedirectStandardError "cloudflare.log" -PassThru
-        Start-Sleep -Seconds 7
+        Start-Process PowerShell -ArgumentList "-NoExit", "-Command", "ssh -p 443 -R0:localhost:3389 a.pinggy.io"
         
-        # Read the log to find the trycloudflare URL
-        $logContent = Get-Content "cloudflare.log" -Raw
         Write-Host "========================================"
-        Write-Host "Windows 11 RDP via Cloudflare is Ready!"
-        Write-Host $logContent
+        Write-Host "Windows 11 RDP via Pinggy is Ready!"
+        Write-Host "Check the GitHub Action log for the Pinggy TCP address (e.g., xxx.pinggy.link:xxxxx)"
         Write-Host "Username: runneradmin"
         Write-Host "Password: Admin@123"
         Write-Host "========================================"
