@@ -25,13 +25,25 @@ jobs:
       run: .\ngrok.exe authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
 
     - name: Start TCP Tunnel for RDP
-      run: Start-Process Powershell -ArgumentList '-Noexit', '-Command', ".\ngrok.exe tcp 3389"
-
-    - name: Display Connection Details
       run: |
+        Start-Process -FilePath ".\ngrok.exe" -ArgumentList "tcp 3389" -NoNewWindow
+        Start-Sleep -Seconds 5
+        
+        # Fetch and display the Ngrok public URL
+        $response = Invoke-RestMethod -Uri "http://localhost:4040/api/tunnels"
+        $tunnelUrl = $response.tunnels[0].public_url
         Write-Host "========================================"
         Write-Host "RDP is Ready!"
+        Write-Host "Address: $tunnelUrl"
         Write-Host "Username: runneradmin"
         Write-Host "Password: Admin@123"
         Write-Host "========================================"
+
+    - name: Keep Alive Loop
+      run: |
+        # This loop prevents the action from closing and keeps the session alive
+        while ($true) {
+            Write-Host "RDP is running... Keeping session alive."
+            Start-Sleep -Seconds 60
+        }
         
