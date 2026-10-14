@@ -16,13 +16,21 @@ jobs:
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 0
         net user runneradmin Admin@123
 
-    - name: Start Pinggy TCP Tunnel
+    - name: Start Pinggy TCP Tunnel and Show URL
       run: |
-        Start-Process PowerShell -ArgumentList "-NoExit", "-Command", "ssh -p 443 -R0:localhost:3389 a.pinggy.io"
+        # Run SSH tunnel in background and capture output to a log file
+        Start-Process -FilePath "ssh.exe" -ArgumentList "-p 443 -R0:localhost:3389 a.pinggy.io" -RedirectStandardOutput "pinggy.log" -RedirectStandardError "pinggy_err.log" -PassThru
+        Start-Sleep -Seconds 7
+        
+        # Read the log to find the Pinggy TCP address
+        $logContent = Get-Content "pinggy.log" -ErrorAction SilentlyContinue
+        $errContent = Get-Content "pinggy_err.log" -ErrorAction SilentlyContinue
         
         Write-Host "========================================"
         Write-Host "Windows 11 RDP via Pinggy is Ready!"
-        Write-Host "Check the GitHub Action log for the Pinggy TCP address (e.g., xxx.pinggy.link:xxxxx)"
+        Write-Host "URL Output:"
+        Write-Host $logContent
+        Write-Host $errContent
         Write-Host "Username: runneradmin"
         Write-Host "Password: Admin@123"
         Write-Host "========================================"
