@@ -9,19 +9,12 @@ jobs:
     timeout-minutes: 360
 
     steps:
-    - name: Set Default User Password & Enable RDP
+    - name: Enable RDP and Set Password
       run: |
-        # Use PowerShell to safely change the runneradmin password to meet Windows policy
-        $Computer = [ADSI]"WinNT://$env:COMPUTERNAME"
-        $User = $Computer.Create("User", "runneradmin")
-        # Alternatively, change password using .NET to bypass policy limits
-        $userObj = [adsis("WinNT://$env:COMPUTERNAME/runneradmin,user")]
-        $userObj.SetPassword("Admin@12345")
-        
-        # Enable RDP and configure firewall
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
         Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 0
+        net user runneradmin Admin@123
 
     - name: Download Ngrok
       run: |
@@ -39,6 +32,6 @@ jobs:
         Write-Host "========================================"
         Write-Host "RDP is Ready!"
         Write-Host "Username: runneradmin"
-        Write-Host "Password: Admin@12345"
+        Write-Host "Password: Admin@123"
         Write-Host "========================================"
         
